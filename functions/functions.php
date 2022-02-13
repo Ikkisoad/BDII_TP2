@@ -8,11 +8,19 @@ function showTable(){
 }
 
 function printTable($results, $tableName = 'noName'){
-	echo $tableName . '<br>';
+	echo $tableName;
+	echo '<table>';
+		echo '<td>id</td>';
+		echo '<td>A</td>';
+		echo '<td>B</td>';
 	foreach($results as $row){
-		print_r($row);
-		echo '<br>';
+		echo '<tr>';
+		echo '<td>'.$row['id'] . '</td>';
+		echo '<td>'.$row['A'] . '</td>';
+		echo '<td>'.$row['B'] . '</td>';
+		echo '</tr>';
 	}
+	echo '</table>';
 }
 
 function getFile($file){
@@ -31,11 +39,17 @@ function getFile($file){
 			$step = "BD Done";
 		}
 		if(str_contains($buffer,"start")){
-			echo 'begin tran';
+			$transactions[getTransactionID($buffer)] = '|';
+			echo 'begin tran - ' . getTransactionID($buffer);
 		}else if(str_contains($buffer,"commit")){
-			echo 'Commit';
+			echo 'Commit - ' . getTransactionID($buffer);;
 		}else if(str_contains($buffer,"CKPT")){
-			echo 'CKPT';
+			if(str_contains($buffer,"Start")){
+				$ckptTrans = getCKPTTransactions($buffer);
+				//echo sizeof($ckptTrans);
+			}else{
+				
+			}
 		}else if(str_contains($buffer,"T")){
 			echo 'Update';
 		}
@@ -63,5 +77,20 @@ function updateBD($values){
 			$result -> execute();
 		}
 	}
+}
+
+function getTransactionID($string){
+	return intval(str_replace("T",'',str_replace("<commit",'',str_replace(">",'',str_replace("<start ",'',$string)))));
+}
+
+function getCKPTTransactions($string){
+	$retorno = array();
+	$i = 0;
+	$transactions = str_replace("<Start CKP(",'',str_replace(")>",'',str_replace("T",'',$string)));
+	$explode = explode(',',$transactions);
+	foreach($explode as $tran){
+		$retorno[$i++] = intval($tran);
+	}
+	return $retorno;
 }
 ?>

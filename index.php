@@ -11,10 +11,17 @@
 			textarea{
 				width: 500;
 			}
+			table, th, td {
+			  border:1px solid black;
+			}
 		</style>
 	</head>
 	<body>
 		<h3>Trabalho 2 - BD2</h3>
+		<form action="index.php" method="post" enctype="multipart/form-data">
+			<input type="file" name="file">
+			<input type="submit" value="Submit" name="submit">
+		</form>
 		<?php 
 			file_put_contents("server/log","Log");
 			showTable(); 
@@ -25,9 +32,5 @@
 			}
 		?>
 		
-		<form action="index.php" method="post" enctype="multipart/form-data">
-			<input type="file" name="file">
-			<input type="submit" value="Submit" name="submit">
-		</form>
 	</body>
 </html>
