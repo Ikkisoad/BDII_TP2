@@ -39,12 +39,13 @@ function getFile($file){
 			$step = "BD Done";
 		}
 		if(str_contains($buffer,"start")){
-			$transactions[getTransactionID($buffer)] = '|';
+			$transactions[getTransactionID($buffer)] = '-';
 			echo 'begin tran - ' . getTransactionID($buffer);
 		}else if(str_contains($buffer,"commit")){
-			echo 'Commit - ' . getTransactionID($buffer);;
+			echo 'Commit - ' . getTransactionID($buffer);
 		}else if(str_contains($buffer,"CKPT")){
 			if(str_contains($buffer,"Start")){
+				$step = "CKPT";
 				$ckptTrans = getCKPTTransactions($buffer);
 				//echo sizeof($ckptTrans);
 			}else{
@@ -52,6 +53,8 @@ function getFile($file){
 			}
 		}else if(str_contains($buffer,"T")){
 			echo 'Update';
+			$query = readQuery($buffer);
+			$transactions[$query['transaction']] .= $query['column'].','$query['id'].'='.$query['value'].'-';
 		}
 		
 		if(str_contains($step,"Create BD")){
@@ -92,5 +95,16 @@ function getCKPTTransactions($string){
 		$retorno[$i++] = intval($tran);
 	}
 	return $retorno;
+}
+
+function readQuery($string){
+	$explode = explode(",",str_replace(">",'',str_replace("<T",'',$string)));
+	$row = array(
+		"transaction" => $explode[0],
+		"id" => $explode[1],
+		"column" => $explode[2],
+		"value" => $explode[3],
+	);
+	return $row;
 }
 ?>
