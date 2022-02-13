@@ -16,6 +16,7 @@
 	<body>
 		<h3>Trabalho 2 - BD2</h3>
 		<?php 
+			file_put_contents("server/log","Log");
 			showTable(); 
 			if(isset($_POST) && $_FILES['file']['tmp_name'] != ''){
 				getFile(fopen($_FILES['file']['tmp_name'],"r"));

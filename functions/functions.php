@@ -20,6 +20,8 @@ function getFile($file){
 	$step = "Create BD";
 	$BD = '';
 	$transactions = array();
+	$log = array(); //Log start of checkpoints
+	$bdLog = array();
 	echo '<textarea rows="50">';
 	while($buffer = fgets($file)){
 		echo '
