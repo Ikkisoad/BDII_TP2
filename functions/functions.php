@@ -4,7 +4,7 @@ function showTable(){
 	$query = "SELECT * FROM tabela1";
 	$result = $conn -> prepare($query);
 	$result -> execute();
-	printTable($result->get_result(),'Tabela1');
+	printTable($result->get_result(),'Tabela');
 }
 
 function printTable($results, $tableName = 'noName'){
@@ -16,21 +16,34 @@ function printTable($results, $tableName = 'noName'){
 }
 
 function getFile($file){
+	$line = 1;
 	$step = "Create BD";
 	$BD = '';
+	$transactions = array();
+	echo '<textarea rows="50">';
 	while($buffer = fgets($file)){
+		echo '
+'.$line++.':';
 		if(!strcmp($buffer,"\n") && str_contains($step,"Create BD")){
 			updateBD($BD);
 			$step = "BD Done";
 		}
+		if(str_contains($buffer,"start")){
+			echo 'begin tran';
+		}else if(str_contains($buffer,"commit")){
+			echo 'Commit';
+		}else if(str_contains($buffer,"CKPT")){
+			echo 'CKPT';
+		}else if(str_contains($buffer,"T")){
+			echo 'Update';
+		}
+		
 		if(str_contains($step,"Create BD")){
 			$BD .= $buffer.'-';
 		}
 		
-		if(str_contains($buffer,"commit")){
-			echo 'Commit<br>';
-		}
 	}
+	echo '</textarea>';
 }
 
 function str_contains($haystack, $needle) {

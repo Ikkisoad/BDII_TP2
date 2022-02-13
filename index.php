@@ -8,6 +8,9 @@
 			body{
 				background-color: #6e6e6e;
 			}
+			textarea{
+				width: 500;
+			}
 		</style>
 	</head>
 	<body>
