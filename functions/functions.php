@@ -25,45 +25,53 @@ function printTable($results, $tableName = 'noName'){
 
 function getFile($file){
 	$line = 1;
+	$redo = '';
+	$retorno = '';
 	$step = "Create BD";
 	$BD = '';
 	$transactions = array();
 	$log = array(); //Log start of checkpoints
 	$bdLog = array();
-	echo '<textarea rows="50">';
 	while($buffer = fgets($file)){
-		echo '
-'.$line++.':';
-		if(!strcmp($buffer,"\n") && str_contains($step,"Create BD")){
+		if(strcmp($buffer,PHP_EOL) && str_contains($step,"Create BD")){
 			updateBD($BD);
+			showTable();
 			$step = "BD Done";
+		}
+		if(str_contains($step,"Create BD")){
+			$BD .= $buffer.'-';
+			echo $step;
+			echo 'here';
 		}
 		if(str_contains($buffer,"start")){
 			$transactions[getTransactionID($buffer)] = '-';
-			echo 'begin tran - ' . getTransactionID($buffer);
 		}else if(str_contains($buffer,"commit")){
-			echo 'Commit - ' . getTransactionID($buffer);
 			$transactions[getTransactionID($buffer)] .= 'commit';
+			if($step == 'CKPT'){
+				$redo .= $transactions[getTransactionID($buffer)];
+				$retorno .= "Transação T".getTransactionID($buffer)." realizou Redo<br>";
+			}
 		}else if(str_contains($buffer,"CKPT")){
 			if(str_contains($buffer,"Start")){
 				$step = "CKPT";
+				$transactions = flushLog($transactions);
+				//print_r($transactions);
 				$ckptTrans = getCKPTTransactions($buffer);
 				//echo sizeof($ckptTrans);
 			}else{
 				
 			}
 		}else if(str_contains($buffer,"T")){
-			echo 'Update';
 			$query = readQuery($buffer);
 			$transactions[$query['transaction']] .= $query['column'].','.$query['id'].'='.$query['value'].'-';
+		}else if(str_contains($buffer,"crash")){
+			updateBD(str_replace("commit",'',$redo));
 		}
 		
-		if(str_contains($step,"Create BD")){
-			$BD .= $buffer.'-';
-		}
+		
 		
 	}
-	echo '</textarea>';
+	return $retorno;
 }
 
 function str_contains($haystack, $needle) {
@@ -104,8 +112,18 @@ function readQuery($string){
 		"transaction" => $explode[0],
 		"id" => $explode[1],
 		"column" => $explode[2],
-		"value" => $explode[3],
+		"value" => str_replace(PHP_EOL,'',$explode[3]),
 	);
 	return $row;
+}
+
+function flushLog($transactions){
+	$i = 0;
+	while($i++ < sizeof($transactions)){
+		if(str_contains($transactions[$i],"commit")){
+			$transactions[$i] = '';
+		}
+	}
+	return $transactions;
 }
 ?>

@@ -24,12 +24,13 @@
 		</form>
 		<?php 
 			file_put_contents("server/log","Log");
-			showTable(); 
 			if(isset($_POST) && $_FILES['file']['tmp_name'] != ''){
-				getFile(fopen($_FILES['file']['tmp_name'],"r"));
+				$result = getFile(fopen($_FILES['file']['tmp_name'],"r"));
 				//echo fread($openFile,10240).'fread<br>'; //A,1=20 A,2=20 B,1=55 B,2=30
 				//$fileArray = file($_FILES['file']['tmp_name']);foreach($fileArray as $row){echo $row;}//Read current values
 			}
+			echo '<br>'.$result;
+			showTable();
 		?>
 		
 	</body>
