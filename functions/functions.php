@@ -43,6 +43,7 @@ function getFile($file){
 			echo 'begin tran - ' . getTransactionID($buffer);
 		}else if(str_contains($buffer,"commit")){
 			echo 'Commit - ' . getTransactionID($buffer);
+			$transactions[getTransactionID($buffer)] .= 'commit';
 		}else if(str_contains($buffer,"CKPT")){
 			if(str_contains($buffer,"Start")){
 				$step = "CKPT";
@@ -54,7 +55,7 @@ function getFile($file){
 		}else if(str_contains($buffer,"T")){
 			echo 'Update';
 			$query = readQuery($buffer);
-			$transactions[$query['transaction']] .= $query['column'].','$query['id'].'='.$query['value'].'-';
+			$transactions[$query['transaction']] .= $query['column'].','.$query['id'].'='.$query['value'].'-';
 		}
 		
 		if(str_contains($step,"Create BD")){
