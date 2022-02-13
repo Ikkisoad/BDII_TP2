@@ -14,4 +14,16 @@ function printTable($results, $tableName = 'noName'){
 		echo '<br>';
 	}
 }
+
+function getFile($file){
+	while($buffer = fgets($file)){
+		if(str_contains($buffer,"commit")){
+			echo 'check this out';
+		}
+	}
+}
+
+function str_contains($haystack, $needle) {
+	return $needle !== '' && mb_strpos($haystack, $needle) !== false;
+}
 ?>
