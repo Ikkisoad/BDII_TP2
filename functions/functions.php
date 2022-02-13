@@ -10,9 +10,9 @@ function showTable(){
 function printTable($results, $tableName = 'noName'){
 	echo $tableName;
 	echo '<table>';
-		echo '<td>id</td>';
+		echo '<tr><td>id</td>';
 		echo '<td>A</td>';
-		echo '<td>B</td>';
+		echo '<td>B</td></tr>';
 	foreach($results as $row){
 		echo '<tr>';
 		echo '<td>'.$row['id'] . '</td>';
@@ -27,21 +27,20 @@ function getFile($file){
 	$line = 1;
 	$redo = '';
 	$retorno = '';
-	$step = "Create BD";
+	$step = "CreateBD";
 	$BD = '';
 	$transactions = array();
 	$log = array(); //Log start of checkpoints
 	$bdLog = array();
 	while($buffer = fgets($file)){
-		if(strcmp($buffer,PHP_EOL) && str_contains($step,"Create BD")){
-			updateBD($BD);
-			showTable();
-			$step = "BD Done";
-		}
-		if(str_contains($step,"Create BD")){
-			$BD .= $buffer.'-';
-			echo $step;
-			echo 'here';
+		if(str_contains($step,"CreateBD")){
+			if(!strcmp($buffer,PHP_EOL)){
+				updateBD($BD);
+				showTable();
+				$step = "BD Done";
+			}else{
+				$BD .= $buffer.'-';
+			}
 		}
 		if(str_contains($buffer,"start")){
 			$transactions[getTransactionID($buffer)] = '-';
