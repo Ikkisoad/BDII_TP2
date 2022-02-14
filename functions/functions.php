@@ -65,7 +65,6 @@ function getFile($file){
 			$transactions[$query['transaction']] .= $query['column'].','.$query['id'].'='.$query['value'].'-';
 		}else if(str_contains($buffer,"crash")){
 			$i = 1;
-			echo $ckptTrans;
 			do{
 			if(($transactions[$i] == '' && str_contains($ckptTrans,strval($i))) || !str_contains($transactions[$i],"commit") && $transactions[$i] != ''){
 					$retorno .= "Transação T".$i." não realizou Redo<br>";
