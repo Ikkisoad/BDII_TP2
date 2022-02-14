@@ -1,4 +1,6 @@
-<?php
+<?ph
+	//echo fread($openFile,10240).'fread<br>'; //A,1=20 A,2=20 B,1=55 B,2=30
+	//$fileArray = file($_FILES['file']['tmp_name']);foreach($fileArray as $row){echo $row;}//Read current values
 function showTable(){
 	global $conn;
 	$query = "SELECT * FROM tabela1";
@@ -54,9 +56,7 @@ function getFile($file){
 			if(str_contains($buffer,"Start")){
 				$step = "CKPT";
 				$transactions = flushLog($transactions);
-				//print_r($transactions);
 				$ckptTrans = getCKPTTransactions($buffer);
-				//echo sizeof($ckptTrans);
 			}else{
 				
 			}
@@ -64,6 +64,12 @@ function getFile($file){
 			$query = readQuery($buffer);
 			$transactions[$query['transaction']] .= $query['column'].','.$query['id'].'='.$query['value'].'-';
 		}else if(str_contains($buffer,"crash")){
+			$i = 1;
+			do{
+				if($transactions[$i] == '' || !str_contains($transactions[$i],"commit")){
+					$retorno .= "Transação T".$i." não realizou Redo<br>";
+				}
+			}while($i++ < sizeof($transactions));
 			updateBD(str_replace("commit",'',$redo));
 		}
 		
