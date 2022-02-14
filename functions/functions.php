@@ -1,4 +1,4 @@
-<?ph
+<?php
 	//echo fread($openFile,10240).'fread<br>'; //A,1=20 A,2=20 B,1=55 B,2=30
 	//$fileArray = file($_FILES['file']['tmp_name']);foreach($fileArray as $row){echo $row;}//Read current values
 function showTable(){
@@ -57,16 +57,17 @@ function getFile($file){
 				$step = "CKPT";
 				$transactions = flushLog($transactions);
 				$ckptTrans = getCKPTTransactions($buffer);
-			}else{
-				
-			}
+			}/*else{
+				$ckptTrans = '';
+			}*/
 		}else if(str_contains($buffer,"T")){
 			$query = readQuery($buffer);
 			$transactions[$query['transaction']] .= $query['column'].','.$query['id'].'='.$query['value'].'-';
 		}else if(str_contains($buffer,"crash")){
 			$i = 1;
+			echo $ckptTrans;
 			do{
-				if($transactions[$i] == '' || !str_contains($transactions[$i],"commit")){
+			if(($transactions[$i] == '' && str_contains($ckptTrans,strval($i))) || !str_contains($transactions[$i],"commit") && $transactions[$i] != ''){
 					$retorno .= "Transação T".$i." não realizou Redo<br>";
 				}
 			}while($i++ < sizeof($transactions));
@@ -101,12 +102,12 @@ function getTransactionID($string){
 }
 
 function getCKPTTransactions($string){
-	$retorno = array();
+	$retorno = '';
 	$i = 0;
 	$transactions = str_replace("<Start CKP(",'',str_replace(")>",'',str_replace("T",'',$string)));
 	$explode = explode(',',$transactions);
 	foreach($explode as $tran){
-		$retorno[$i++] = intval($tran);
+		$retorno .= $tran.',';
 	}
 	return $retorno;
 }
