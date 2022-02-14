@@ -1,12 +1,12 @@
 <?php
 	//echo fread($openFile,10240).'fread<br>'; //A,1=20 A,2=20 B,1=55 B,2=30
 	//$fileArray = file($_FILES['file']['tmp_name']);foreach($fileArray as $row){echo $row;}//Read current values
-function showTable(){
+function showTable($tableName = ''){
 	global $conn;
 	$query = "SELECT * FROM tabela1";
 	$result = $conn -> prepare($query);
 	$result -> execute();
-	printTable($result->get_result(),'Tabela');
+	printTable($result->get_result(),$tableName);
 }
 
 function printTable($results, $tableName = 'noName'){
@@ -38,7 +38,7 @@ function getFile($file){
 		if(str_contains($step,"CreateBD")){
 			if(!strcmp($buffer,PHP_EOL)){
 				updateBD($BD);
-				showTable();
+				showTable("Before");
 				$step = "BD Done";
 			}else{
 				$BD .= $buffer.'-';

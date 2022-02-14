@@ -27,8 +27,8 @@
 			if(isset($_POST) && $_FILES['file']['tmp_name'] != ''){
 				$result = getFile(fopen($_FILES['file']['tmp_name'],"r"));
 			}
-			echo '<br>'.$result;
-			showTable();
+			echo '<br>'.$result.'<br>';
+			showTable("After");
 		?>
 		
 	</body>
