@@ -26,14 +26,13 @@ function printTable($results, $tableName = 'noName'){
 }
 
 function getFile($file){
-	$line = 1;
+	$date = new DateTime();
 	$redo = '';
 	$retorno = '';
 	$step = "CreateBD";
 	$BD = '';
 	$transactions = array();
-	$log = array(); //Log start of checkpoints
-	$bdLog = array();
+	$log = ''; //Log start of checkpoints
 	while($buffer = fgets($file)){
 		if(str_contains($step,"CreateBD")){
 			if(!strcmp($buffer,PHP_EOL)){
@@ -55,6 +54,7 @@ function getFile($file){
 		}else if(str_contains($buffer,"CKPT")){
 			if(str_contains($buffer,"Start")){
 				$step = "CKPT";
+				$log .= 'CKPT Start:'.date('Y-m-d\TH:i:s.u', time()).'<br>';
 				$transactions = flushLog($transactions);
 				$ckptTrans = getCKPTTransactions($buffer);
 			}/*else{
@@ -72,10 +72,8 @@ function getFile($file){
 			}while($i++ < sizeof($transactions));
 			updateBD(str_replace("commit",'',$redo));
 		}
-		
-		
-		
 	}
+	//echo $log.'<br>';
 	return $retorno;
 }
 
