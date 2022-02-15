@@ -32,7 +32,8 @@ function getFile($file){
 	$step = "CreateBD";
 	$BD = '';
 	$transactions = array();
-	$log = ''; //Log start of checkpoints
+	$ckptStart = ''; //Log start of checkpoint
+	$ckptEnd = ''; //Log end of checkpoint
 	while($buffer = fgets($file)){
 		if(str_contains($step,"CreateBD")){
 			if(!strcmp($buffer,PHP_EOL)){
@@ -54,12 +55,12 @@ function getFile($file){
 		}else if(str_contains($buffer,"CKPT")){
 			if(str_contains($buffer,"Start")){
 				$step = "CKPT";
-				$log .= 'CKPT Start:'.date('Y-m-d\TH:i:s.u', time()).'<br>';
+				$ckptStart = 'CKPT Start:'.date('Y-m-d\TH:i:s.u', time()).'<br>';
 				$transactions = flushLog($transactions);
 				$ckptTrans = getCKPTTransactions($buffer);
-			}/*else{
-				$ckptTrans = '';
-			}*/
+			}else{
+				$ckptEnd = 'CKPT End:'.date('Y-m-d\TH:i:s.u', time()).'<br>';
+			}
 		}else if(str_contains($buffer,"T")){
 			$query = readQuery($buffer);
 			$transactions[$query['transaction']] .= $query['column'].','.$query['id'].'='.$query['value'].'-';
@@ -73,7 +74,8 @@ function getFile($file){
 			updateBD(str_replace("commit",'',$redo));
 		}
 	}
-	//echo $log.'<br>';
+	echo $ckptStart.'<br>';
+	echo $ckptEnd;
 	return $retorno;
 }
 
@@ -92,21 +94,6 @@ function updateBD($values){
 			$result -> execute();
 		}
 	}
-}
-
-function getTransactionID($string){
-	return intval(str_replace("T",'',str_replace("<commit",'',str_replace(">",'',str_replace("<start ",'',$string)))));
-}
-
-function getCKPTTransactions($string){
-	$retorno = '';
-	$i = 0;
-	$transactions = str_replace("<Start CKP(",'',str_replace(")>",'',str_replace("T",'',$string)));
-	$explode = explode(',',$transactions);
-	foreach($explode as $tran){
-		$retorno .= $tran.',';
-	}
-	return $retorno;
 }
 
 function readQuery($string){

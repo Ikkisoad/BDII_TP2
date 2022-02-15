@@ -1,5 +1,6 @@
 <?php
 		require_once "functions/functions.php";
+		require_once "functions/functions2.php";
 		$db_name = "bdii_tp2";
 		$mysql_user = "root";
         $mysql_pass = "root";

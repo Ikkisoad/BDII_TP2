@@ -21,12 +21,12 @@
 	</head>
 	<body>
 		<h3>Trabalho 2 - BD2</h3>
-		<form action="index.php" method="post">
+		<form action="index2.php" method="post">
 			<input type="text" name="A" placeholder="A">
 			<input type="text" name="B" placeholder="B">
 			<input type="submit" value="Submit" name="submit">
 		</form>
-		<form action="index.php" method="post" enctype="multipart/form-data">
+		<form action="index2.php" method="post" enctype="multipart/form-data">
 			<input type="file" name="file">
 			<input type="submit" value="Submit" name="submit">
 		</form>
@@ -34,7 +34,11 @@
 			file_put_contents("server/log","Log");
 			if(isset($_FILES['file']['tmp_name'])){
 				if(isset($_POST) && $_FILES['file']['tmp_name'] != ''){
-					$result = getFile(fopen($_FILES['file']['tmp_name'],"r"));
+					$file = fopen($_FILES['file']['tmp_name'],"r");
+					loadBD($file);
+					echo '<textarea rows=50>';
+					$result = readLog($file);
+					echo '</textarea>';
 					echo '<br>'.$result.'<br>';
 				}
 			}
