@@ -36,10 +36,9 @@
 				if(isset($_POST) && $_FILES['file']['tmp_name'] != ''){
 					$file = fopen($_FILES['file']['tmp_name'],"r");
 					loadBD($file);
-					echo '<textarea rows=50>';
-					$result = readLog($file);
-					echo '</textarea>';
-					echo '<br>'.$result.'<br>';
+					//echo '<textarea rows=50>';
+					readLog($file);
+					//echo '</textarea>';
 				}
 			}
 			showTable("After");

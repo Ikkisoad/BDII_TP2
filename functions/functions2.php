@@ -3,7 +3,6 @@
 function readLog($file){
 	$i = 0;
 	$step = 0;
-	$redo = array();
 	$unfinishedTransactions = array();
 	$commitOrder = array();
 	$redoTransactions = array();
@@ -13,14 +12,14 @@ function readLog($file){
 			fseek($file,$i+2,SEEK_END);
 			$buffer = fgets($file);
 			if(str_contains($buffer,"start")){
-				if($step = 1){
+				if($step == 1){
 					if(array_search(getTransactionID($buffer),$unfinishedTransactions) !== false){
 						array_splice($unfinishedTransactions,array_search(getTransactionID($buffer),$unfinishedTransactions),1);
 						if(sizeof($unfinishedTransactions) == 0) break;
 					}
-				}else if($step = 0){
+				}else if($step == 0){
+					array_push($unfinishedTransactions,intval(getTransactionID($buffer)));
 					array_push($redoTransactions,intval(getTransactionID($buffer)));
-					
 				}
 			}else if(str_contains($buffer,"commit")){
 				array_push($commitOrder,getTransactionID($buffer));
@@ -35,26 +34,25 @@ function readLog($file){
 					}
 					$step = 1;
 				}
-			}else if(str_contains($buffer,"T")){
-				
 			}
 		}
 	}
 	
 	while($buffer = fgets($file)){
-		print_r($transactions);
-		print_r($redoTransactions);
+		//print_r($redoTransactions);
+		//print_r($transactions);
 		echo $buffer;
 		if(str_contains($buffer,"start")){
-			
+			//do nothing
 		}else if(str_contains($buffer,"commit")){
 			$transactionID = getTransactionID($buffer);
 			if(array_search($transactionID,$redoTransactions) !== false){
 				array_splice($redoTransactions,array_search($transactionID,$redoTransactions),1);
 				updateBD($transactions[$transactionID]);
+				echo 'Transação T'.$transactionID.' realizou Redo<br>';
 			}
 		}else if(str_contains($buffer,"CKPT")){
-			
+			//do nothing
 		}else if(str_contains($buffer,"T")){
 			$query = readQuery($buffer);
 			if(isset($transactions[$query['transaction']])){
@@ -63,6 +61,9 @@ function readLog($file){
 				$transactions[$query['transaction']] = $query['column'].','.$query['id'].'='.$query['value'].'-';
 			}
 		}
+	}
+	foreach($redoTransactions as $T){
+		echo 'Transação T'.$T.' não realizou Redo<br>';
 	}
 }
 
