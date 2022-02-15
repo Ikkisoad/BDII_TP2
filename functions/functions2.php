@@ -4,7 +4,6 @@ function readLog($file){
 	$i = 0;
 	$step = 0;
 	$unfinishedTransactions = array();
-	$commitOrder = array();
 	$redoTransactions = array();
 	$transactions = array();
 	while(fseek($file,$i--,SEEK_END) == 0){
@@ -22,7 +21,7 @@ function readLog($file){
 					array_push($redoTransactions,intval(getTransactionID($buffer)));
 				}
 			}else if(str_contains($buffer,"commit")){
-				array_push($commitOrder,getTransactionID($buffer));
+				//do nothing
 			}else if(str_contains($buffer,"CKPT")){
 				if(str_contains($buffer,"Start")){
 					foreach(explode(',',getCKPTTransactions($buffer)) as $ckptTransaction){
