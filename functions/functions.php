@@ -94,6 +94,7 @@ function flushLog($transactions){
 }
 
 function insertAB($A,$B){
+	global $conn;
 	$query = 'INSERT INTO `tabela1`(`id`, `A`, `B`) VALUES (NULL,'.$A.','.$B.')';
 	$result = $conn -> prepare($query);
 	$result -> execute();
