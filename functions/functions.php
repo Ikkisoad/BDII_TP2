@@ -83,30 +83,6 @@ function str_contains($haystack, $needle) {
 	return $needle !== '' && mb_strpos($haystack, $needle) !== false;
 }
 
-function updateBD($values){
-	global $conn;
-	foreach(explode('-',$values) as $row){
-		if($row != ''){
-			$array = explode(',',$row);
-			$arrayTwo = explode('=',$array[1]);
-			$query = 'UPDATE `tabela1` SET `'.$array[0].'`='.$arrayTwo[1].' WHERE `id`='.$arrayTwo[0].'';
-			$result = $conn -> prepare($query);
-			$result -> execute();
-		}
-	}
-}
-
-function readQuery($string){
-	$explode = explode(",",str_replace(">",'',str_replace("<T",'',$string)));
-	$row = array(
-		"transaction" => $explode[0],
-		"id" => $explode[1],
-		"column" => $explode[2],
-		"value" => str_replace(PHP_EOL,'',$explode[3]),
-	);
-	return $row;
-}
-
 function flushLog($transactions){
 	$i = 0;
 	while($i++ < sizeof($transactions)){
@@ -115,5 +91,11 @@ function flushLog($transactions){
 		}
 	}
 	return $transactions;
+}
+
+function insertAB($A,$B){
+	$query = 'INSERT INTO `tabela1`(`id`, `A`, `B`) VALUES (NULL,'.$A.','.$B.')';
+	$result = $conn -> prepare($query);
+	$result -> execute();
 }
 ?>

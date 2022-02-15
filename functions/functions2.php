@@ -1,11 +1,5 @@
 <?php
 
-function insertAB($A,$B){
-	$query = 'INSERT INTO `tabela1`(`id`, `A`, `B`) VALUES (NULL,'.$A.','.$B.')';
-	$result = $conn -> prepare($query);
-	$result -> execute();
-}
-
 function readLog($file){
 	$i = 0;
 	$step = 0;
@@ -13,6 +7,7 @@ function readLog($file){
 	$unfinishedTransactions = array();
 	$commitOrder = array();
 	$redoTransactions = array();
+	$transactions = array();
 	while(fseek($file,$i--,SEEK_END) == 0){
 		if(fgetc($file) == "\n"){
 			fseek($file,$i+2,SEEK_END);
@@ -20,7 +15,7 @@ function readLog($file){
 			if(str_contains($buffer,"start")){
 				if($step = 1){
 					if(array_search(getTransactionID($buffer),$unfinishedTransactions) !== false){
-						array_splice($unfinishedTransactions,array_search(getTransactionID($buffer),$unfinishedTransactions));
+						array_splice($unfinishedTransactions,array_search(getTransactionID($buffer),$unfinishedTransactions),1);
 						if(sizeof($unfinishedTransactions) == 0) break;
 					}
 				}else if($step = 0){
@@ -40,7 +35,6 @@ function readLog($file){
 					}
 					$step = 1;
 				}
-				print_r($redoTransactions);
 			}else if(str_contains($buffer,"T")){
 				
 			}
@@ -48,7 +42,27 @@ function readLog($file){
 	}
 	
 	while($buffer = fgets($file)){
+		print_r($transactions);
+		print_r($redoTransactions);
 		echo $buffer;
+		if(str_contains($buffer,"start")){
+			
+		}else if(str_contains($buffer,"commit")){
+			$transactionID = getTransactionID($buffer);
+			if(array_search($transactionID,$redoTransactions) !== false){
+				array_splice($redoTransactions,array_search($transactionID,$redoTransactions),1);
+				updateBD($transactions[$transactionID]);
+			}
+		}else if(str_contains($buffer,"CKPT")){
+			
+		}else if(str_contains($buffer,"T")){
+			$query = readQuery($buffer);
+			if(isset($transactions[$query['transaction']])){
+				$transactions[$query['transaction']] .= $query['column'].','.$query['id'].'='.$query['value'].'-';
+			}else{
+				$transactions[$query['transaction']] = $query['column'].','.$query['id'].'='.$query['value'].'-';
+			}
+		}
 	}
 }
 
@@ -80,5 +94,29 @@ function loadBD($file){
 
 function getTransactionID($string){
 	return intval(str_replace("T",'',str_replace("<commit",'',str_replace(">",'',str_replace("<start ",'',$string)))));
+}
+
+function readQuery($string){
+	$explode = explode(",",str_replace(">",'',str_replace("<T",'',$string)));
+	$row = array(
+		"transaction" => $explode[0],
+		"id" => $explode[1],
+		"column" => $explode[2],
+		"value" => str_replace(PHP_EOL,'',$explode[3]),
+	);
+	return $row;
+}
+
+function updateBD($values){
+	global $conn;
+	foreach(explode('-',$values) as $row){
+		if($row != ''){
+			$array = explode(',',$row);
+			$arrayTwo = explode('=',$array[1]);
+			$query = 'UPDATE `tabela1` SET `'.$array[0].'`='.$arrayTwo[1].' WHERE `id`='.$arrayTwo[0].'';
+			$result = $conn -> prepare($query);
+			$result -> execute();
+		}
+	}
 }
 ?>
