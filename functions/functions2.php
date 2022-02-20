@@ -86,7 +86,7 @@ function loadBD($file){
 	$BD = '';
 	while($step == 1){
 		$buffer = fgets($file);
-		if(strcmp($buffer,PHP_EOL)){
+		if($buffer == "\n" || strcmp($buffer,PHP_EOL) == 0){
 			updateBD($BD);
 			showTable("Before");
 			$step = 0;
