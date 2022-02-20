@@ -3,6 +3,7 @@
 function readLog($file){
 	$i = 0;
 	$step = 0;
+	$endCKPT = 0;
 	$unfinishedTransactions = array();
 	$redoTransactions = array();
 	$transactions = array();
@@ -14,16 +15,18 @@ function readLog($file){
 				if($step == 1){
 					if(array_search(getTransactionID($buffer),$unfinishedTransactions) !== false){
 						array_splice($unfinishedTransactions,array_search(getTransactionID($buffer),$unfinishedTransactions),1);
-						if(sizeof($unfinishedTransactions) == 0) break;
+						if(sizeof($unfinishedTransactions) == 0){
+							break;
+						}
 					}
 				}else if($step == 0){
-					array_push($unfinishedTransactions,intval(getTransactionID($buffer)));
+					//array_push($unfinishedTransactions,intval(getTransactionID($buffer)));
 					array_push($redoTransactions,intval(getTransactionID($buffer)));
 				}
 			}else if(str_contains($buffer,"commit")){
 				//do nothing
 			}else if(str_contains($buffer,"CKPT")){
-				if(str_contains($buffer,"Start")){
+				if(str_contains($buffer,"Start") && $endCKPT == 1){
 					foreach(explode(',',getCKPTTransactions($buffer)) as $ckptTransaction){
 						$ckptTransaction = intval($ckptTransaction);
 						if($ckptTransaction != 0 && array_search($ckptTransaction,$redoTransactions) === false){
@@ -32,6 +35,8 @@ function readLog($file){
 						}
 					}
 					$step = 1;
+				}else{
+					$endCKPT = 1;
 				}
 			}
 		}
@@ -40,7 +45,6 @@ function readLog($file){
 	while($buffer = fgets($file)){
 		//print_r($redoTransactions);
 		//print_r($transactions);
-		echo $buffer;
 		if(str_contains($buffer,"start")){
 			//do nothing
 		}else if(str_contains($buffer,"commit")){
@@ -82,7 +86,7 @@ function loadBD($file){
 	$BD = '';
 	while($step == 1){
 		$buffer = fgets($file);
-		if(!strcmp($buffer,PHP_EOL)){
+		if(strcmp($buffer,PHP_EOL)){
 			updateBD($BD);
 			showTable("Before");
 			$step = 0;
