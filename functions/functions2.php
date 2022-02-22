@@ -51,7 +51,7 @@ function readLog($file){
 			$transactionID = getTransactionID($buffer);
 			if(array_search($transactionID,$redoTransactions) !== false){
 				array_splice($redoTransactions,array_search($transactionID,$redoTransactions),1);
-				updateBD($transactions[$transactionID]);
+				updateBD($transactions[$transactionID],1);
 				echo 'Transação T'.$transactionID.' realizou Redo<br>';
 			}
 		}else if(str_contains($buffer,"CKPT")){
@@ -111,16 +111,33 @@ function readQuery($string){
 	return $row;
 }
 
-function updateBD($values){
+function updateBD($values, $verify = 0){
 	global $conn;
 	foreach(explode('-',$values) as $row){
 		if($row != ''){
 			$array = explode(',',$row);
 			$arrayTwo = explode('=',$array[1]);
+			if($verify){
+				foreach(selectNode($arrayTwo[0]) as $result){
+					if($result[$array[0]] == $arrayTwo[1]){
+						echo $array[0].$arrayTwo[0].' não atualizou<br>';
+						continue;
+					}
+				}
+			}
 			$query = 'UPDATE `tabela1` SET `'.$array[0].'`='.$arrayTwo[1].' WHERE `id`='.$arrayTwo[0].'';
 			$result = $conn -> prepare($query);
 			$result -> execute();
 		}
 	}
+}
+
+function selectNode($ID = 0){
+	global $conn;
+	$query = "SELECT `id`, `A`, `B` FROM `tabela1` WHERE id = ?";
+	$result = $conn->prepare($query);
+	$result->bind_param("i",$ID);
+	$result->execute();
+	return $result->get_result();
 }
 ?>
